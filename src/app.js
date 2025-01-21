@@ -7,18 +7,23 @@ app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   const user = new User(req.body);
-  await user.save();
-  res.send("User added Successfully!");
+
+  try {
+    await user.save();
+    res.send("User added Successfully!");
+  } catch (err) {
+    res.status(400).send("Error saving the user: " + err.message);
+  }
 });
 
+// Get user by email
 app.get("/user", async (req, res) => {
   const userEmail = req.body.emailId;
 
   try {
-    const user = await User.find({emailId: userEmail});
+    const user = await User.find({ emailId: userEmail });
     res.send(user);
-  }
-  catch(err) {
+  } catch (err) {
     res.status(400).send("Something went wrong");
   }
 });
@@ -29,8 +34,7 @@ app.get("/feed", async (req, res) => {
   try {
     const user = await User.find({});
     res.send(user);
-  }
-  catch(err) {
+  } catch (err) {
     res.status(400).send("Something went wrong");
   }
 });
@@ -40,23 +44,41 @@ app.delete("/user", async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(userId);
     res.send("User deleted successfully");
-  }
-  catch(err) {
+  } catch (err) {
     res.status(400).send("Something went wrong");
   }
 });
 
 app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+  const userId = req.params?.userId;
   const data = req.body;
+
   try {
-    const user = await User.findByIdAndUpdate({_id: userId}, data);
+    const ALLOWED_UPDATES = [
+      "userId",
+      "photoUrl",
+      "about",
+      "gender",
+      "age",
+      "skills",
+    ];
+
+    const isUpdateAllowed = Object.keys(data).every((k) => {
+      ALLOWED_UPDATES.includes(k);
+    });
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed");
+    }
+    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+    console.log(user);
     res.send("User Updated successfully");
+  } catch (err) {
+    res.status(400).send("Update Failed:" + err.message);
   }
-  catch(err) {
-    res.status(400).send("Something went wrong");
-  }
-})
+});
 
 connectDB()
   .then(() => {
