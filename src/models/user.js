@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema(
       default:
         "https://static.vecteezy.com/system/resources/previews/045/944/199/non_2x/male-default-placeholder-avatar-profile-gray-picture-isolated-on-background-man-silhouette-picture-for-user-profile-in-social-media-forum-chat-greyscale-illustration-vector.jpg",
       validate(value) {
-        if (!validator.URL(value)) {
+        if (!validator.isURL(value)) {
           throw new Error("Invalid Photo URL: " + value);
         }
       },
