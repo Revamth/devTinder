@@ -5,7 +5,6 @@ const User = require("./models/user");
 const { userAuth } = require("./middlewares/auth");
 const bcrypt = require("bcrypt");
 const { validateSignUpData } = require("./utils/validation");
-const validator = require("validator");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 
